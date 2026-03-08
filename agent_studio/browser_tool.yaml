@@ -1,9 +1,8 @@
 ---
-kind: tool
+kind: wowbits_tool
 name: browser_tool
-config:
-  type: python_function
-  function_name: browser_tool
+type: PYTHON_FUNCTION
+python_function_name: browser_tool
 description: >
   Browser automation with session management. One tool call can run a task and return the result (run_task_and_wait). All actions take `action`; most also need `session_id`. Optional `task`, `instruction`, `timeout_seconds` per action.
 arguments:
@@ -17,7 +16,7 @@ preferred_usage: >
   For a single browser task, use TWO tool calls only: (1) browser_tool(action="start_session") → save session_id; (2) browser_tool(action="run_task_and_wait", session_id=..., task="...") → get result. Avoid run_task + repeated get_status (causes many tool calls).
 
 ---
-kind: agent
+kind: wowbits_agent
 name: browser_tool
 config:
   default_model: openai/gpt-4o-mini
@@ -89,7 +88,7 @@ instructions: |
   When the user is done or you have the final result, always call stop_session(session_id) so the browser and session are closed.
 
 ---
-kind: skill
+kind: wowbits_skill
 name: browser_tool
 config:
   default_model: openai/gpt-4o-mini

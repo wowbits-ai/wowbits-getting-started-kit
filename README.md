@@ -1,238 +1,149 @@
 # WowBits Getting Started Kit
 
-A collection of reusable tools and functions for building AI agents and skills with WowBits. This kit provides ready-to-use functions that can be integrated into your AI agents to extend their capabilities.
-
-## 🚀 Features
-
-This kit includes the following tools:
-
-### 1. Browser Tool
-Automate web browsers with session management. Control a real browser to perform tasks, navigate websites, and extract information.
-
-**Use cases:**
-- Web scraping and data extraction
-- Automated testing
-- Form filling and submission
-- Website navigation and interaction
-
-[📖 Browser Tool Documentation](functions/browser_tool.md)
-
-### 2. SERP API Tool
-Get Google search results programmatically using SerpAPI. Access organic results, knowledge graphs, answer boxes, and related searches.
-
-**Use cases:**
-- Research and information gathering
-- Competitive analysis
-- Content discovery
-- Fact checking and verification
-- Local business search
-- News monitoring
-
-[📖 SERP API Documentation](functions/serp_api.md)
-
-## 📦 Installation
-
-### Prerequisites
-
-- Python 3.8 or higher
-- pip package manager
-
-### Setup
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/PankajMoolrajani/wowbits-getting-started-kit.git
-   cd wowbits-getting-started-kit
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   pip install -r functions/requirements.txt
-   ```
-
-3. **Set up environment variables:**
-   
-   Create a `.env` file in the root directory:
-   ```env
-   # For Browser Tool (if needed)
-   OPENAI_API_KEY=your_openai_api_key_here
-   
-   # For SERP API Tool
-   SERPAPI_API_KEY=your_serpapi_key_here
-   ```
-
-## 🎯 Quick Start
-
-### Using the Browser Tool
-
-```python
-import asyncio
-from functions.browser_tool import browser_tool
-
-async def main():
-    # Start a browser session
-    session = await browser_tool(action="start_session")
-    session_id = session["session_id"]
-    
-    # Run a task
-    result = await browser_tool(
-        action="run_task_and_wait",
-        session_id=session_id,
-        task="Go to python.org and get the latest Python version"
-    )
-    
-    print(result)
-    
-    # Clean up
-    await browser_tool(action="stop_session", session_id=session_id)
-
-asyncio.run(main())
-```
-
-### Using the SERP API Tool
-
-```python
-import asyncio
-from functions.serp_api import serp_api
-
-async def main():
-    # Search Google
-    result = await serp_api(
-        query="Python programming tutorials",
-        num_results=5
-    )
-    
-    if result["status"] == "success":
-        for item in result["organic_results"]:
-            print(f"{item['title']}: {item['link']}")
-    else:
-        print(f"Error: {result['error']}")
-
-asyncio.run(main())
-```
-
-## 🛠️ Available Functions
-
-### Browser Tool
-
-**Function:** `browser_tool(action, session_id=None, task=None, instruction=None, timeout_seconds=None)`
-
-**Actions:**
-- `start_session` - Start a new browser session
-- `run_task_and_wait` - Run a task and wait for completion (recommended)
-- `run_task` - Run a task in the background
-- `get_status` - Get current task status
-- `get_result` - Get task result
-- `pause` / `resume` - Control task execution
-- `add_instruction` / `update_task` - Modify running tasks
-- `stop` - Stop current task
-- `stop_session` - Clean up and close browser
-
-### SERP API Tool
-
-**Function:** `serp_api(query, num_results=10, location=None, language="en", safe_search=False)`
-
-**Parameters:**
-- `query` (required) - Search query string
-- `num_results` - Number of results (1-100, default: 10)
-- `location` - Location for localized results
-- `language` - Language code (default: "en")
-- `safe_search` - Enable safe search (default: False)
-
-**Returns:**
-- `organic_results` - List of search results
-- `knowledge_graph` - Knowledge graph data (if available)
-- `answer_box` - Direct answer (if available)
-- `related_searches` - Related search queries
-- `related_questions` - "People also ask" questions
-
-## 📚 Documentation
-
-Each tool has detailed documentation in the `functions/` directory:
-
-- [Browser Tool Documentation](functions/browser_tool.md) - Complete guide for browser automation
-- [SERP API Documentation](functions/serp_api.md) - Complete guide for Google Search
-
-## 🔑 API Keys
-
-### OpenAI API Key (for Browser Tool)
-Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
-
-### SerpAPI Key (for SERP Tool)
-Get your API key from [SerpAPI](https://serpapi.com/) - Free tier includes 100 searches/month
-
-## 🏗️ Project Structure
-
-```
-wowbits-getting-started-kit/
-├── functions/               # Reusable tool functions
-│   ├── browser_tool.py     # Browser automation tool
-│   ├── browser_tool.md     # Browser tool documentation
-│   ├── serp_api.py         # Google search tool
-│   ├── serp_api.md         # SERP API documentation
-│   └── requirements.txt    # Python dependencies
-├── agent_runner/           # Agent execution environment
-├── agent_studio/           # Agent configuration
-├── data/                   # Data storage
-└── README.md              # This file
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! To add a new tool:
-
-1. Create your tool as `functions/your_tool.py`
-2. Add documentation as `functions/your_tool.md`
-3. Update `functions/requirements.txt` if needed
-4. Add usage examples in the documentation
-5. Submit a pull request
-
-## 📝 Best Practices
-
-### For Browser Tool
-- Always call `stop_session` when done to clean up resources
-- Use `run_task_and_wait` for single tasks (simplest approach)
-- Provide clear, step-by-step instructions in tasks
-- Handle timeouts gracefully
-
-### For SERP API Tool
-- Be mindful of your API quota (100 free searches/month)
-- Use specific queries for better results
-- Leverage `location` parameter for local searches
-- Check `knowledge_graph` and `answer_box` for quick answers
-- Handle errors gracefully (especially API key issues)
-
-## ❓ Troubleshooting
-
-### Common Issues
-
-**Browser Tool:**
-- "Session not found" - Make sure you use the correct session_id from start_session
-- Timeout errors - Increase timeout_seconds or check your task complexity
-- Browser crashes - Ensure you have sufficient system resources
-
-**SERP API Tool:**
-- "SERPAPI_API_KEY not set" - Set the environment variable in your `.env` file
-- "serpapi package not installed" - Run `pip install google-search-results`
-- Quota exceeded - Wait for monthly reset or upgrade your plan
-
-## 📄 License
-
-This project is part of the WowBits ecosystem. Please check individual tool licenses and third-party API terms of service.
-
-## 🔗 Resources
-
-- [WowBits Documentation](https://wowbits.ai/docs)
-- [SerpAPI Documentation](https://serpapi.com/docs)
-- [Browser-Use Documentation](https://github.com/browser-use/browser-use)
-
-## 💬 Support
-
-For questions and support:
-- Open an issue in this repository
-- Check the individual tool documentation
-- Visit [WowBits Community](https://wowbits.ai/community)
+**Ship AI agents in minutes, not days.** This repo is your reference workspace: prebuilt agents, tools, and MCPs so you can run a real agent with one CLI and zero boilerplate.
 
 ---
 
-**Made with ❤️ for the WowBits community**
+## Why WowBits
+
+Most agent frameworks make you wire SDKs, infra, and prompts by hand. WowBits gives you:
+
+- **One flow:** YAML → create → run. No custom servers or glue code.
+- **Config as code:** Agents live in `agent_studio/*.yaml`. Version them, review them, reuse them.
+- **Tools your way:** Python functions in `functions/` or any MCP server. One connector (e.g. OpenAI), then focus on behavior.
+
+**wowbits-cli** is the only binary you need. It manages functions, connectors, agents, and MCPs—and runs agents on [Google ADK](https://github.com/google/adk) (web UI or API) so you get a chat interface or an API out of the box.
+
+---
+
+## Who it’s for
+
+- **Builders** who want a running agent in one sitting.
+- **Teams** that want agent definitions in Git, not scattered in dashboards.
+- **Anyone** tired of stitching LLM + tools + orchestration from scratch.
+
+---
+
+## Get started (under 5 minutes)
+
+**Prereqs:** Python 3.8+, an LLM API key (e.g. OpenAI).
+
+**1. Install the CLI**
+
+```bash
+pip install wowbits-cli
+```
+
+**2. Use this repo as your WowBits root**
+
+```bash
+export WOWBITS_ROOT_DIR="$(pwd)"   # or the path to this repo
+```
+
+Put that in `~/.zshrc` or `~/.bashrc`, or add `WOWBITS_ROOT_DIR=/path/to/wowbits-getting-started-kit` to a `.env` in this folder.
+
+**3. Setup (once)**
+
+```bash
+wowbits setup
+```
+
+Pick **SQLite** when prompted. This creates `data/`, `agent_studio/`, `functions/`, `agent_runner/`, and the DB.
+
+**4. Register tools and create the browser agent**
+
+```bash
+wowbits create function
+wowbits create connector --provider openai    # paste your API key when asked
+wowbits create agent browser_tool
+```
+
+**5. Run it**
+
+```bash
+wowbits run agent browser_tool
+```
+
+Open **http://localhost:5151** and ask the agent to do something in a browser (e.g. “Go to example.com and tell me the page title”).
+
+---
+
+## How WowBits works
+
+| Idea | Meaning |
+|------|--------|
+| **Tool** | A single capability: a **Python function** (e.g. in `functions/`) or an **MCP server** (e.g. in `mcps/`). |
+| **Skill** | An LLM + tools (and optionally sub-skills). Runs as one unit. Defined in YAML with `kind: wowbits_skill`. |
+| **Agent** | The top-level runner: an LLM + one or more skills. Execution can be **LLM**, **sequential**, or **parallel**. Defined in YAML with `kind: wowbits_agent`. |
+
+Pipeline: **YAML** in `agent_studio/` → `wowbits create agent` → stored in DB → `wowbits run agent` → ADK serves web UI or API. You never touch generated runner code unless you want to.
+
+---
+
+## wowbits-cli at a glance
+
+| Action | Command |
+|--------|--------|
+| First-time setup | `wowbits setup [--root-dir PATH]` |
+| List | `wowbits list functions` \| `connectors` \| `agents` |
+| Register tools | `wowbits create function [--dir PATH]` |
+| Add LLM/API | `wowbits create connector --provider openai` |
+| Create/update agent | `wowbits create agent <name>` (uses `agent_studio/<name>.yaml`) |
+| Register MCP | `wowbits create mcp <name>` (uses `mcps/<name>/config.yaml`) |
+| Run agent | `wowbits run agent <name> [--mode web|api] [-p PORT]` |
+| Run MCP server | `wowbits run mcp <name>` |
+| Pull tools from GitHub | `wowbits pull functions --repo-url <url>` |
+
+Full reference: [wowbits-cli](https://github.com/wowbits/wowbits-cli#readme).
+
+---
+
+## What’s in this kit
+
+**Reference agents** (`agent_studio/`)
+
+- **browser_tool** — Agent that drives a real browser (start session → run task → get result). Good for automation, scraping, or quick E2E flows. Uses the `browser_tool` Python function.
+- **get_twitter_feeds** — Example agent shape; swap in your own tool implementation.
+
+**Tools** (`functions/`)
+
+- **browser_tool** — Browser automation with sessions: `start_session`, `run_task_and_wait`, `stop_session`, etc. [Details](functions/browser_tool.md).
+- **serp_api** — Google search via SerpAPI. [Details](functions/serp_api.md).
+
+Run `pip install -r functions/requirements.txt`. Put `OPENAI_API_KEY` (and `SERPAPI_API_KEY` if you use Serp) in `.env` or your environment.
+
+**MCPs** (`mcps/`)
+
+- **playwright** — Example MCP server. The CLI reads **config.yaml** from each MCP folder. The [playwright](mcps/playwright/) example has `wowbits.yaml`; copy it to `config.yaml` so `wowbits create mcp playwright` works.
+
+---
+
+## Run modes
+
+- **Web (default):** `wowbits run agent browser_tool` → http://localhost:5151 (ADK chat UI).
+- **API only:** `wowbits run agent browser_tool --mode api` (no UI, same port).
+- Custom port: `wowbits run agent browser_tool -p 8080`.
+
+---
+
+## If something breaks
+
+| Symptom | What to do |
+|--------|------------|
+| `WOWBITS_ROOT_DIR` not set | Run `wowbits setup` or set it (e.g. in `.env` or shell rc). |
+| Agent create fails on “invalid kind” | Use `kind: wowbits_tool`, `kind: wowbits_skill`, `kind: wowbits_agent` in your YAML. |
+| “Python function 'X' not found” | Run `wowbits create function` so `functions/` is scanned and registered. |
+| Agent needs a model/API | Run `wowbits create connector --provider openai` (or the provider your agent uses). |
+| MCP create fails | Add `mcps/<name>/config.yaml` with `kind: wowbits_mcp_config` and a `config` block (`name`, `url`, `config`). |
+
+---
+
+## Next steps
+
+- **Tweak agents:** Edit `agent_studio/*.yaml`, then `wowbits create agent <name>` and `wowbits run agent <name>` again.
+- **Tool docs:** [Browser tool](functions/browser_tool.md), [SERP API](functions/serp_api.md).
+- **CLI repo:** [wowbits-cli](https://github.com/wowbits/wowbits-cli#readme).
+
+---
+
+*WowBits — from zero to a running agent in one flow.*
