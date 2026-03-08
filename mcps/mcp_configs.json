@@ -5,7 +5,14 @@
             "config": {
                 "api_key": "your_api_key_here",
                 "transport_mode": "http"
-            },
+            }
+        },
+        {
+            "name": "genai_toolbox",
+            "url": "http://127.0.0.1:5050/mcp",
+            "config": {
+                "transport_mode": "http"
+            }
         }
     ]
 }
