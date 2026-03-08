@@ -1,11 +1,26 @@
 {
-    "mcps": [
-        {
-            "name": "shodan",
-            "config": {
-                "api_key": "your_api_key_here",
-                "transport_mode": "http"
-            },
+  "mcps": [
+    {
+      "name": "playwright",
+      "url": "http://localhost:8931/mcp",
+      "config": {
+        "transport_mode": "http"
+      }
+    },
+    {
+      "name": "llm_sandbox",
+      "url": null,
+      "config": {
+        "transport_mode": "stdio",
+        "timeout": 60,
+        "command": "python3",
+        "args": ["-m", "llm_sandbox.mcp_server.server"],
+        "env": {
+          "BACKEND": "docker",
+          "COMMIT_CONTAINER": "true",
+          "KEEP_TEMPLATE": "true"
         }
-    ]
+      }
+    }
+  ]
 }

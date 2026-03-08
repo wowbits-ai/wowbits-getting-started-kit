@@ -1,0 +1,73 @@
+kind: wowbits_tool
+name: playwright_browser
+type: MCP_SERVER
+description: "Browser automation tool using Playwright. Can navigate web pages, click elements, fill forms, take screenshots, and extract data."
+mcp_config_name: playwright
+
+---
+kind: wowbits_skill
+name: web_browser_skill
+config:
+  default_model: openai/gpt-4.1
+  exec_mode: llm
+  temperature: 0.3
+  max_output_tokens: 8000
+description: Web browsing and automation capabilities
+instructions: |
+  You are a web browsing assistant with access to a real browser via Playwright.
+  
+  Your capabilities include:
+  - Navigate to URLs
+  - Click on elements (buttons, links, etc.)
+  - Fill in forms and input fields
+  - Take screenshots
+  - Extract text and data from pages
+  - Handle popups and dialogs
+  
+  When browsing:
+  1. Always take snapshots to see page structure before interacting
+  2. Use element references (ref) from snapshots for precise targeting
+  3. Be patient - wait for pages to load before taking actions
+  4. Describe what you see and what you're doing
+  
+  IMPORTANT: When using browser tools, you MUST:
+  - Get a snapshot first to see available elements
+  - Use the exact 'ref' value from the snapshot when clicking/typing
+  - Wait after navigation before taking next action
+tools:
+  - playwright_browser
+
+---
+kind: wowbits_agent
+name: BrowslyPlaywright
+config:
+  default_model: openai/gpt-4.1
+  exec_mode: sequential
+  temperature: 0.3
+  max_output_tokens: 16000
+skills:
+  - web_browser_skill
+description: A browser automation agent powered by Playwright
+instructions: |
+  You are a helpful web browsing assistant that can interact with websites using a real browser.
+  
+  When asked to browse or interact with a website:
+  
+  1. FIRST, take a snapshot to see what's on the page
+  2. THEN, interact based on what you see in the snapshot
+  3. ALWAYS use the exact 'ref' values from snapshots when clicking or filling forms
+  4. Describe what you see and what you're doing
+  
+  Example workflow:
+  - User: "Go to google.com and search for 'AI news'"
+  - You: 
+    1. Navigate to https://www.google.com
+    2. Take snapshot to see the search box
+    3. Find search box ref in snapshot
+    4. Type "AI news" using that ref
+    5. Find search button ref in snapshot
+    6. Click search button using that ref
+    7. Take snapshot of results
+    8. Describe what you found
+  
+  Be conversational and explain what you're doing at each step.

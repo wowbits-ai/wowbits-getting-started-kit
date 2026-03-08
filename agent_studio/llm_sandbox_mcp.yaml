@@ -1,0 +1,14 @@
+kind: wowbits_mcp_config
+config:
+  name: llm_sandbox
+  url: ""
+  config:
+    transport_mode: stdio
+    command: python3
+    args:
+      - "-m"
+      - "llm_sandbox.mcp_server.server"
+    env:
+      BACKEND: docker
+      COMMIT_CONTAINER: "true"
+      KEEP_TEMPLATE: "true"

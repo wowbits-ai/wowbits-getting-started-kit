@@ -1,37 +1,37 @@
 {
-    "browser": {
-      "browserName": "chromium",
-      "isolated": false,
-      "launchOptions": {
-        "headless": false,
-        "args": []
-      },
-      "contextOptions": {
-        "viewport": {
-          "width": 1280,
-          "height": 720
-        }
+  "browser": {
+    "browserName": "chromium",
+    "isolated": false,
+    "launchOptions": {
+      "headless": false,
+      "args": []
+    },
+    "contextOptions": {
+      "viewport": {
+        "width": 1280,
+        "height": 720
       }
-    },
-    "server": {
-      "port": 8931,
-      "host": "localhost"
-    },
-    "capabilities": ["core"],
-    "saveSession": false,
-    "saveTrace": false,
-    "outputDir": "/Users/pankajmoolrajani/Code/wowbits-getting-started-kit/data",
-    "outputMode": "stdout",
-    "console": {
-      "level": "info"
-    },
-    "timeouts": {
-      "action": 5000,
-      "navigation": 60000
-    },
-    "imageResponses": "allow",
-    "snapshot": {
-      "mode": "incremental"
-    },
-    "allowUnrestrictedFileAccess": false
-  }
+    }
+  },
+  "server": {
+    "port": 8931,
+    "host": "localhost"
+  },
+  "capabilities": ["core"],
+  "saveSession": false,
+  "saveTrace": false,
+  "outputDir": "./data",
+  "outputMode": "stdout",
+  "console": {
+    "level": "info"
+  },
+  "timeouts": {
+    "action": 5000,
+    "navigation": 60000
+  },
+  "imageResponses": "allow",
+  "snapshot": {
+    "mode": "incremental"
+  },
+  "allowUnrestrictedFileAccess": false
+}
