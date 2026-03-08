@@ -1,0 +1,8 @@
+{
+    "server": {
+        "port": 5050,
+        "host": "127.0.0.1"
+    },
+    "tools_file": "tools.yaml",
+    "description": "GenAI Toolbox for Databases - MCP server providing SQL tools for the WowBits SQLite database"
+}

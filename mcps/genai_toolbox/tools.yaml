@@ -1,0 +1,87 @@
+---
+kind: sources
+name: wowbits-sqlite
+type: "sqlite"
+database: "/Users/Mohit/Desktop/wowbits-getting-started-kit/data/wowbits.db"
+
+---
+kind: tools
+name: list-all-tables
+type: sqlite-sql
+source: wowbits-sqlite
+description: >
+  List all table names available in the database. Use this tool first to discover
+  what data is available before querying specific tables.
+statement: "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
+
+---
+kind: tools
+name: describe-table
+type: sqlite-sql
+source: wowbits-sqlite
+description: >
+  Get the schema (column names, types, constraints) for a specific table.
+  Use this to understand the structure of a table before querying it.
+  Example: {"tableName": "agents"}
+statement: |
+  SELECT sql FROM sqlite_master WHERE type='table' AND name = ?;
+parameters:
+  - name: tableName
+    type: string
+    description: The exact name of the table to describe.
+
+---
+kind: tools
+name: query-table
+type: sqlite-execute-sql
+source: wowbits-sqlite
+description: >
+  Run a read-only SQL SELECT query against the database.
+  Use this tool to retrieve data from any table. Always use SELECT statements only.
+  Example: {"sql": "SELECT * FROM agents LIMIT 10"}
+
+---
+kind: tools
+name: search-agents
+type: sqlite-sql
+source: wowbits-sqlite
+description: >
+  Search for agents by name. Returns agent id, name, description, model, and status.
+parameters:
+  - name: search_term
+    type: string
+    description: The search term to look for in agent names (supports partial matching).
+statement: >
+  SELECT id, name, description, default_model, status
+  FROM agents
+  WHERE name LIKE '%' || ? || '%';
+
+---
+kind: tools
+name: list-mcp-servers
+type: sqlite-sql
+source: wowbits-sqlite
+description: >
+  List all registered MCP server configurations including their name, URL, and config.
+statement: "SELECT id, name, url, config FROM mcp_configs;"
+
+---
+kind: tools
+name: list-skills
+type: sqlite-sql
+source: wowbits-sqlite
+description: >
+  List all skills registered in the system with their name, description, model, and execution mode.
+statement: >
+  SELECT id, name, description, default_model, exec_mode FROM skills;
+
+---
+kind: toolsets
+name: db_tools
+tools:
+  - list-all-tables
+  - describe-table
+  - query-table
+  - search-agents
+  - list-mcp-servers
+  - list-skills
