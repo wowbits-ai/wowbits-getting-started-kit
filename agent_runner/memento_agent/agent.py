@@ -1,7 +1,9 @@
 from uuid import UUID
 import logging
+import os
+from pathlib import Path
 from google.adk.agents import LlmAgent, SequentialAgent, ParallelAgent
-from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StreamableHTTPConnectionParams, SseConnectionParams
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StreamableHTTPConnectionParams, SseConnectionParams, StdioConnectionParams
 from pylibs.database_manager import get_db_manager
 from db.schema import (
     Agent, AgentSkill, Skill, SkillSkill, SkillTool, Tool, 
@@ -63,6 +65,25 @@ def load_tools_for_skill(session, skill_id):
                 elif transport_mode == "sse":
                     url = cfg.url
                     tools.append(MCPToolset(connection_params=SseConnectionParams(url=url)))
+                elif transport_mode == "stdio":
+                    command = c.get("command", "npx")
+                    args = c.get("args", [])
+                    # Resolve env vars from config, falling back to os.environ
+                    env_config = c.get("env", {})
+                    env = {}
+                    for k, v in env_config.items():
+                        if isinstance(v, str) and v.startswith("${") and v.endswith("}"):
+                            env_var_name = v[2:-1]
+                            env[k] = os.environ.get(env_var_name, "")
+                        else:
+                            env[k] = v
+                    tools.append(MCPToolset(
+                        connection_params=StdioConnectionParams(
+                            command=command,
+                            args=args,
+                            env=env if env else None,
+                        )
+                    ))
                 else:
                     logger.warning(f"Unknown transport mode: {transport_mode}")
                     continue

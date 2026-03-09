@@ -5,7 +5,14 @@
             "config": {
                 "api_key": "your_api_key_here",
                 "transport_mode": "http"
-            },
+            }
+        },
+        {
+            "name": "memento",
+            "url": "http://localhost:8932/sse",
+            "config": {
+                "transport_mode": "sse"
+            }
         }
     ]
 }
