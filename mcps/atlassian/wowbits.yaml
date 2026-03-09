@@ -1,6 +1,0 @@
-kind: mcp_config
-config:
-  name: atlassian
-  url: http://localhost:8932/sse
-  config:
-    transport_mode: sse

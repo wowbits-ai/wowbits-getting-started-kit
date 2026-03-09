@@ -6,6 +6,13 @@
                 "api_key": "your_api_key_here",
                 "transport_mode": "http"
             }
+        },
+        {
+            "name": "atlassian",
+            "url": "http://localhost:8932/sse",
+            "config": {
+                "transport_mode": "sse"
+            }
         }
     ]
 }

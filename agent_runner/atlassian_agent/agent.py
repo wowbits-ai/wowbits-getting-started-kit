@@ -1,5 +1,7 @@
 from uuid import UUID
+import json
 import logging
+import os
 from google.adk.agents import LlmAgent, SequentialAgent, ParallelAgent
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StreamableHTTPConnectionParams, SseConnectionParams
 from pylibs.database_manager import get_db_manager
@@ -15,6 +17,31 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 agent_id = "6a18c081-c126-41bb-a550-3154f8507a18"
+
+
+def load_mcp_configs_from_json():
+    """Load MCP configurations from mcps/mcp_configs.json file."""
+    root_dir = os.environ.get("WOWBITS_ROOT_DIR", "")
+    config_path = os.path.join(root_dir, "mcps", "mcp_configs.json")
+    if not os.path.exists(config_path):
+        logger.warning(f"mcp_configs.json not found at {config_path}")
+        return []
+    try:
+        with open(config_path, "r") as f:
+            data = json.load(f)
+        return data.get("mcps", [])
+    except Exception:
+        logger.exception(f"Failed to load mcp_configs.json from {config_path}")
+        return []
+
+
+def get_mcp_config_by_name(name):
+    """Look up an MCP config by name from mcp_configs.json."""
+    configs = load_mcp_configs_from_json()
+    for cfg in configs:
+        if cfg.get("name") == name:
+            return cfg
+    return None
 
 
 def load_python_function(session, python_function_id):
@@ -50,18 +77,30 @@ def load_tools_for_skill(session, skill_id):
                 logger.exception(f"Failed loading python function tool for skill {skill_id}")
         elif tool_ob.type == ToolType.MCP_SERVER:
             try:
-                cfg = session.get(MCPConfig, tool_ob.mcp_config_id)
-                if not cfg:
+                # Get the MCP name from the DB record
+                db_cfg = session.get(MCPConfig, tool_ob.mcp_config_id)
+                if not db_cfg:
                     continue
-                c = cfg.config or {}
+                mcp_name = db_cfg.name
+                
+                # Look up config from mcp_configs.json (preferred source)
+                json_cfg = get_mcp_config_by_name(mcp_name)
+                if json_cfg:
+                    url = json_cfg.get("url", db_cfg.url)
+                    c = json_cfg.get("config", {})
+                    logger.info(f"Loaded MCP '{mcp_name}' config from mcp_configs.json")
+                else:
+                    # Fallback to DB config
+                    url = db_cfg.url
+                    c = db_cfg.config or {}
+                    logger.info(f"Loaded MCP '{mcp_name}' config from database (fallback)")
+                
                 transport_mode = c.get("transport_mode")
                 if not transport_mode:
                     continue
                 if transport_mode == "http":
-                    url = cfg.url
                     tools.append(MCPToolset(connection_params=StreamableHTTPConnectionParams(url=url)))
                 elif transport_mode == "sse":
-                    url = cfg.url
                     tools.append(MCPToolset(connection_params=SseConnectionParams(url=url)))
                 else:
                     logger.warning(f"Unknown transport mode: {transport_mode}")
