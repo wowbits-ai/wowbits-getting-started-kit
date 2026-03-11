@@ -1,10 +1,7 @@
-
 from uuid import UUID
 import logging
 from google.adk.agents import LlmAgent, SequentialAgent, ParallelAgent
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StreamableHTTPConnectionParams, SseConnectionParams
-from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
-from mcp import StdioServerParameters
 from pylibs.database_manager import get_db_manager
 from db.schema import (
     Agent, AgentSkill, Skill, SkillSkill, SkillTool, Tool, 
@@ -39,13 +36,10 @@ def load_tools_for_skill(session, skill_id):
     """Load all tools (Python functions and MCP servers) for a skill."""
     tools = []
     links = session.query(SkillTool).filter(SkillTool.skill_id == skill_id).all()
-    logger.info(f"[TOOLS] skill_id={skill_id} -> {len(links)} skill_tool link(s) found")
     for link in links:
         tool_ob = session.get(Tool, link.tool_id)
         if not tool_ob:
-            logger.warning(f"[TOOLS] tool_id={link.tool_id} not found in tools table")
             continue
-        logger.info(f"[TOOLS] tool='{tool_ob.name}' type={tool_ob.type} mcp_config_id={tool_ob.mcp_config_id}")
         
         if tool_ob.type == ToolType.PYTHON_FUNCTION:
             try:
@@ -56,51 +50,24 @@ def load_tools_for_skill(session, skill_id):
                 logger.exception(f"Failed loading python function tool for skill {skill_id}")
         elif tool_ob.type == ToolType.MCP_SERVER:
             try:
-                # SQLite + postgresql UUID workaround: dashed vs hex mismatch.
-                # Use REPLACE to normalize both sides for comparison.
-                from sqlalchemy import text as _sa_text
-                _hex_id = str(tool_ob.mcp_config_id).replace("-", "")
-                _row = session.execute(
-                    _sa_text("SELECT id, name, url, config FROM mcp_configs WHERE REPLACE(id, '-', '') = :hid"),
-                    {"hid": _hex_id}
-                ).first()
-                if _row:
-                    cfg = MCPConfig(id=_row[0], name=_row[1], url=_row[2], config=_row[3] if not isinstance(_row[3], str) else __import__('json').loads(_row[3]))
-                else:
-                    cfg = None
+                cfg = session.get(MCPConfig, tool_ob.mcp_config_id)
                 if not cfg:
-                    logger.warning(f"[TOOLS] MCPConfig id={tool_ob.mcp_config_id} not found in mcp_configs table")
                     continue
                 c = cfg.config or {}
                 transport_mode = c.get("transport_mode")
-                logger.info(f"[TOOLS] MCPConfig name='{cfg.name}' url='{cfg.url}' transport_mode='{transport_mode}'")
                 if not transport_mode:
-                    logger.warning(f"[TOOLS] transport_mode missing in config for mcp '{cfg.name}'")
                     continue
-                _timeout = float(c.get("timeout", 30))
                 if transport_mode == "http":
-                    url = cfg.url or c.get("url")
-                    logger.info(f"[TOOLS] Creating Streamable-HTTP MCPToolset -> url='{url}' timeout={_timeout}")
-                    tools.append(MCPToolset(connection_params=StreamableHTTPConnectionParams(url=url, timeout=_timeout)))
+                    url = cfg.url
+                    tools.append(MCPToolset(connection_params=StreamableHTTPConnectionParams(url=url)))
                 elif transport_mode == "sse":
-                    url = cfg.url or c.get("url")
-                    logger.info(f"[TOOLS] Creating SSE MCPToolset -> url='{url}' timeout={_timeout}")
-                    tools.append(MCPToolset(connection_params=SseConnectionParams(url=url, timeout=_timeout)))
-                elif transport_mode == "stdio":
-                    command = c.get("command", "python3")
-                    args = c.get("args", [])
-                    env = c.get("env") or None
-                    logger.info(f"[TOOLS] Creating Stdio MCPToolset -> command='{command}' args={args} timeout={_timeout}")
-                    tools.append(MCPToolset(connection_params=StdioConnectionParams(
-                        server_params=StdioServerParameters(command=command, args=args, env=env),
-                        timeout=_timeout,
-                    )))
+                    url = cfg.url
+                    tools.append(MCPToolset(connection_params=SseConnectionParams(url=url)))
                 else:
-                    logger.warning(f"[TOOLS] Unknown transport mode: {transport_mode}")
+                    logger.warning(f"Unknown transport mode: {transport_mode}")
                     continue
             except Exception:
-                logger.exception(f"[TOOLS] Failed loading MCP tool '{tool_ob.name}' for skill {skill_id}")
-    logger.info(f"[TOOLS] skill_id={skill_id} -> {len(tools)} toolset(s) loaded")
+                logger.exception(f"Failed loading MCP tool for skill {skill_id}")
     return tools
 
 

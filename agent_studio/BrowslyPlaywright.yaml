@@ -1,11 +1,11 @@
-kind: wowbits_tool
+kind: tool
 name: playwright_browser
 type: MCP_SERVER
 description: "Browser automation tool using Playwright. Can navigate web pages, click elements, fill forms, take screenshots, and extract data."
 mcp_config_name: playwright
 
 ---
-kind: wowbits_skill
+kind: skill
 name: web_browser_skill
 config:
   default_model: openai/gpt-4.1
@@ -38,7 +38,7 @@ tools:
   - playwright_browser
 
 ---
-kind: wowbits_agent
+kind: agent
 name: BrowslyPlaywright
 config:
   default_model: openai/gpt-4.1
