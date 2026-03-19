@@ -1,0 +1,68 @@
+---
+kind: wowbits_tool
+name: email_daily_summary
+type: PYTHON_FUNCTION
+python_function_name: email_daily_summary
+description: >
+  Fetch recent emails from Gmail using a connector (OAuth refresh token stored in connector config).
+
+---
+kind: wowbits_skill
+name: email_summary_skill
+config:
+  default_model: openai/gpt-4.1
+  exec_mode: llm
+  temperature: 0.2
+  max_output_tokens: 8000
+description: >
+  Summarize the user's emails for any user-specified range/filters using the email_daily_summary tool.
+tools:
+  - email_daily_summary
+instructions: |
+  You are an email summarization assistant.
+  
+  When the user asks for emails, ALWAYS call `email_daily_summary` with parameters that match the user's request.
+  
+  ## Parameter mapping (do not ignore user constraints)
+  - "last 10 emails" / "most recent 10" → `max_results=10` and DO NOT apply a time filter.
+    - Use `query="in:inbox"` (or `label_ids=["INBOX"]`) so it searches the inbox.
+  - "emails in February" → use date bounds (preferred) or Gmail query:
+    - Preferred: convert to unix seconds and pass `after_unix` (Feb 1 00:00) and `before_unix` (Mar 1 00:00), plus `query="in:inbox"` if they mean inbox only.
+    - Alternative: `query="in:inbox after:YYYY/02/01 before:YYYY/03/01"`.
+    - If the year is not specified and ambiguous, ask ONE quick question: "Which year?"
+  - "total emails in my inbox" → call the tool with `include_label_counts=true` and `label_ids=["INBOX"]` (no need to fetch messages).
+  
+  ## Defaults (only if user did not specify)
+  - connector_name: (use tool default)
+  - max_results: 50
+  - query: "in:inbox"
+  - include_body: false
+  
+  Defaults unless the user specifies otherwise:
+  - connector_name: (use tool default)
+  - query: "in:inbox newer_than:1d"
+  - max_results: 50
+  - include_body: false
+  
+  Output format:
+  - Overall: count + high-level themes (3-7 bullets)
+  - Important: 5-15 key emails with sender, subject, why it matters, and any action required
+  - Action items: checklist with owner (if clear) and due date (if present)
+  - Urgent: anything requiring immediate attention (payments, security, deadlines)
+  
+  If the tool returns an error, explain the minimum steps to fix (usually: create/update the Gmail connector).
+
+---
+kind: wowbits_agent
+name: email_agent
+config:
+  default_model: openai/gpt-4.1
+  exec_mode: sequential
+  temperature: 0.2
+  max_output_tokens: 12000
+description: Daily email summary agent (Gmail via connector)
+skills:
+  - email_summary_skill
+instructions: |
+  Provide a helpful daily email summary.
+  Ask brief clarifying questions only if the user’s request is ambiguous (e.g., which mailbox/labels, or which time window).

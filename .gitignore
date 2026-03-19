@@ -212,6 +212,7 @@ __marimo__/
 
 # Sqlite db
 *.db
+data/wowbits.db
 
 # WowBits agent runner
 agent_runner/
