@@ -6,7 +6,7 @@ Kali container and returns its output.  Use dedicated tools first
 (nmap, gobuster, etc.) and fall back to this for everything else.
 """
 
-from mcp_server import kali_client
+import executor
 
 
 def register(mcp) -> None:
@@ -23,4 +23,4 @@ def register(mcp) -> None:
             command: Full shell command to execute (e.g. 'ls -la /tmp').
             timeout: Maximum seconds to wait before the command is killed (default 120).
         """
-        return kali_client.run(command, timeout=timeout)
+        return executor.execute_tool(command, timeout=timeout)

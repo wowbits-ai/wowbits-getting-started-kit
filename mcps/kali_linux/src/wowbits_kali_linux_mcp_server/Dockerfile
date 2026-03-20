@@ -28,24 +28,28 @@ RUN gunzip /usr/share/wordlists/rockyou.txt.gz 2>/dev/null || true
 # Give nmap raw-socket capabilities so it works without full root
 RUN setcap cap_net_raw,cap_net_admin+eip /usr/bin/nmap
 
-# Install Flask (API server only needs Flask)
-RUN pip3 install --break-system-packages flask
+# Install fastmcp
+# Note: pip install dependencies
+RUN pip3 install --break-system-packages fastmcp
 
 # Create a working directory for file outputs (wget, etc.)
 RUN mkdir -p /app/data
 
 WORKDIR /app
 
-# Copy only the API server code into the container
-COPY kali_api_server/ /app/kali_api_server/
+# Copy the server, executor, and tools directory
+COPY server.py /app/server.py
+COPY executor.py /app/executor.py
+COPY tools/ /app/tools/
 
 ENV PYTHONPATH=/app
 ENV LOG_LEVEL=INFO
-ENV PORT=5000
-ENV HOST=0.0.0.0
+ENV MCP_HOST=0.0.0.0
+ENV MCP_PORT=8765
 # Set to "true" to restrict execution to the pre-approved command allowlist
 ENV ENFORCE_ALLOWLIST=false
 
-EXPOSE 5000
+# Expose the single MCP server port
+EXPOSE 8765
 
-CMD ["python3", "/app/kali_api_server/server.py"]
+CMD ["python3", "/app/server.py"]

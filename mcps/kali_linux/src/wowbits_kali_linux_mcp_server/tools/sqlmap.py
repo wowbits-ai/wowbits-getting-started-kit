@@ -2,7 +2,7 @@
 tools/sqlmap.py — Automated SQL injection detection and exploitation.
 """
 
-from mcp_server import kali_client
+import executor
 
 
 def register(mcp) -> None:
@@ -49,4 +49,4 @@ def register(mcp) -> None:
             cmd += f" --dbms={dbms}"
         if options:
             cmd += f" {options}"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)

@@ -2,7 +2,7 @@
 tools/wget.py — File download and web spidering.
 """
 
-from mcp_server import kali_client
+import executor
 
 _DATA_DIR = "/app/data"
 
@@ -52,4 +52,4 @@ def register(mcp) -> None:
             cmd += f" {options}"
 
         cmd += f" '{url}'"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)

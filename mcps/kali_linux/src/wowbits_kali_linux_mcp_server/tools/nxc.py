@@ -5,7 +5,7 @@ NetExec is the community continuation of CrackMapExec.
 Supports SMB, SSH, WinRM, RDP, LDAP, MSSQL, FTP and more.
 """
 
-from mcp_server import kali_client
+import executor
 
 _VALID_PROTOCOLS = {"smb", "ssh", "winrm", "rdp", "ldap", "ldaps", "mssql", "ftp", "vnc", "wmi"}
 
@@ -43,7 +43,7 @@ def register(mcp) -> None:
             cmd += f" -d '{domain}'"
         if options:
             cmd += f" {options}"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)
 
     @mcp.tool()
     def nxc_run(
@@ -62,4 +62,4 @@ def register(mcp) -> None:
             timeout:  Seconds before the command is killed (default 120).
         """
         cmd = f"nxc {protocol} {target} {options}"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)

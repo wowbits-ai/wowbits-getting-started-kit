@@ -5,7 +5,7 @@ Useful for interacting with web applications, APIs, login forms,
 and crafting custom HTTP requests directly from an agent.
 """
 
-from mcp_server import kali_client
+import executor
 
 
 def register(mcp) -> None:
@@ -64,4 +64,4 @@ def register(mcp) -> None:
             cmd += f" {options}"
 
         cmd += f" '{url}'"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)

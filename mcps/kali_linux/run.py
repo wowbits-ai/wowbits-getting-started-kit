@@ -1,8 +1,8 @@
 """
 Convenience launcher for the WowBits Kali Linux MCP stack.
 
-Both services (Kali tool executor + MCP HTTP server) run inside Docker.
-This script just starts docker-compose from the correct directory.
+The Kali tool executor and FastMCP server run natively together in a single Docker container.
+This script just calls the appropriate bash scripts to build and start the container.
 
 After running this, the MCP endpoint is live at: http://localhost:8765/mcp
 wowbits connects to that URL automatically — no path dependency.
@@ -13,15 +13,14 @@ Usage:
 """
 
 import os
-import shutil
 import subprocess
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def _find_compose_dir() -> str:
-  folder_name = "wowbits_kali_linux_mcp_server"
+def _find_server_dir() -> str:
+  folder_name = "src/wowbits_kali_linux_mcp_server"
   candidates = [
     os.path.join(_HERE, folder_name),
     os.path.join(os.path.dirname(_HERE), folder_name),
@@ -39,28 +38,14 @@ def _find_compose_dir() -> str:
   )
 
 
-def _compose_cmd() -> list[str]:
-  # Prefer 'docker compose' (v2, built-in) over 'docker-compose' (v1 snap)
-  # The snap version has a known race condition bug.
-  if shutil.which("docker"):
-    return ["docker", "compose"]
-  if shutil.which("docker-compose"):
-    return ["docker-compose"]
-  raise FileNotFoundError(
-    "Neither 'docker' nor 'docker-compose' was found in PATH. "
-    "Please install Docker and Docker Compose."
-  )
-
-
-COMPOSE_DIR = _find_compose_dir()
-COMPOSE_CMD = _compose_cmd()
-
+SERVER_DIR = _find_server_dir()
 action = sys.argv[1] if len(sys.argv) > 1 else "up"
 
 if action == "stop":
-  subprocess.run([*COMPOSE_CMD, "down"], cwd=COMPOSE_DIR, check=True)
+  subprocess.run(["bash", "scripts/stop.sh"], cwd=SERVER_DIR, check=True)
 else:
-  subprocess.run([*COMPOSE_CMD, "up", "-d", "--build"], cwd=COMPOSE_DIR, check=True)
+  subprocess.run(["bash", "scripts/build.sh"], cwd=SERVER_DIR, check=True)
+  subprocess.run(["bash", "scripts/start.sh"], cwd=SERVER_DIR, check=True)
 
 print("\nMCP server is starting up.")
 print("Endpoint: http://localhost:8765/mcp")

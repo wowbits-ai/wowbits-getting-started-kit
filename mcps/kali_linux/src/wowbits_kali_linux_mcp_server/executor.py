@@ -1,5 +1,5 @@
 """
-Command executor for the Kali API server.
+executor.py — Command executor for the Kali MCP server.
 
 Handles subprocess execution with timeouts, logging, and an optional
 command allowlist (if ENFORCE_ALLOWLIST=true in the container env).
@@ -46,15 +46,21 @@ def is_allowed(command: str) -> bool:
         return False
 
 
-def execute(command: str, timeout: int = 120) -> dict:
+def execute_tool(command: str, timeout: int = 120) -> str:
     """
-    Execute a shell command.
+    Execute a shell command locally inside the Kali container.
 
-    Returns a dict with keys: stdout, stderr, returncode.
-    Never raises — errors are captured and returned in the dict.
+    Returns a formatted string containing stdout, stderr, and exit code.
+    Never raises — errors are captured and returned in the string.
     """
     if not command or not command.strip():
-        return {"stdout": "", "stderr": "Empty command provided.", "returncode": 1}
+        return "[ERROR] Empty command provided."
+
+    enforce_allowlist = os.getenv("ENFORCE_ALLOWLIST", "false").lower() == "true"
+    if enforce_allowlist and not is_allowed(command):
+        base = shlex.split(command.strip())[0] if shlex.split(command.strip()) else "N/A"
+        logger.warning("Blocked disallowed command: %s", base)
+        return f"[ERROR] Command not in allowlist: {base}"
 
     logger.info("Executing (timeout=%ss): %s", timeout, command)
 
@@ -66,23 +72,23 @@ def execute(command: str, timeout: int = 120) -> dict:
             text=True,
             timeout=timeout,
         )
-        logger.debug("Exit %s for: %s", result.returncode, command)
-        return {
-            "stdout": result.stdout,
-            "stderr": result.stderr,
-            "returncode": result.returncode,
-        }
+        rc = result.returncode
+        stdout = (result.stdout or "").strip()
+        stderr = (result.stderr or "").strip()
+        logger.debug("Exit %s for: %s", rc, command)
     except subprocess.TimeoutExpired:
         logger.warning("Timeout (%ss) for: %s", timeout, command)
-        return {
-            "stdout": "",
-            "stderr": f"Command timed out after {timeout} seconds.",
-            "returncode": 124,
-        }
+        return f"[ERROR] Command timed out after {timeout} seconds."
     except Exception as exc:
         logger.error("Execution error for '%s': %s", command, exc)
-        return {
-            "stdout": "",
-            "stderr": f"Execution error: {exc}",
-            "returncode": 1,
-        }
+        return f"[ERROR] Execution error: {exc}"
+
+    parts = []
+    if stdout:
+        parts.append(stdout)
+    if stderr:
+        parts.append(f"[stderr]\n{stderr}")
+    if rc not in (0, None) and not stderr:
+        parts.append(f"[exit code: {rc}]")
+
+    return "\n".join(parts) if parts else "Command completed with no output."

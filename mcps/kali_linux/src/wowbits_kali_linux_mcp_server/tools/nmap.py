@@ -5,7 +5,7 @@ Wraps nmap with typed parameters so agents don't have to remember flags.
 Falls through to run_terminal_command for anything more exotic.
 """
 
-from mcp_server import kali_client
+import executor
 
 _SCAN_FLAGS = {
     "basic":      "-sT",           # TCP connect — no root needed
@@ -48,4 +48,4 @@ def register(mcp) -> None:
             cmd += f" -p {ports}"
         if extra_flags:
             cmd += f" {extra_flags}"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)

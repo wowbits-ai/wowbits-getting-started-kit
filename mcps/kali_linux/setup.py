@@ -1,2 +1,3 @@
-# Nothing to install on the host beyond requirements.txt in wowbits_kali_linux_mcp_server/.
-# Run:  pip install -r wowbits_kali_linux_mcp_server/requirements.txt
+# The Kali Linux MCP Server runs entirely inside Docker.
+# There are no host dependencies to install!
+# Just run `python3 run.py` to build and start the container.

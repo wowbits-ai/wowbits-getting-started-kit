@@ -4,7 +4,7 @@ tools/searchsploit.py — Exploit-DB search via searchsploit.
 Helps agents find known exploits for a given technology, version, or CVE.
 """
 
-from mcp_server import kali_client
+import executor
 
 
 def register(mcp) -> None:
@@ -36,4 +36,4 @@ def register(mcp) -> None:
             cmd += " -e"
         if options:
             cmd += f" {options}"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)

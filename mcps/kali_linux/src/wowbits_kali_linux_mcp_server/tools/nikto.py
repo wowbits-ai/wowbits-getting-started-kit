@@ -5,7 +5,7 @@ nikto checks for dangerous files/CGIs, outdated software versions,
 and server configuration issues.
 """
 
-from mcp_server import kali_client
+import executor
 
 
 def register(mcp) -> None:
@@ -33,4 +33,4 @@ def register(mcp) -> None:
             cmd += " -ssl"
         if options:
             cmd += f" {options}"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)

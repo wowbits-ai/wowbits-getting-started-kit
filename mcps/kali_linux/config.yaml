@@ -1,9 +1,6 @@
 kind: wowbits_mcp_config
 config:
   name: kali_linux
-  # Server must be running before wowbits connects:
-  #   cd wowbits_kali_linux_mcp_server && python3 mcp_server/server.py
-  # For production: just change the url to your hosted endpoint.
   url: http://localhost:8765/mcp
   config:
     transport_mode: http

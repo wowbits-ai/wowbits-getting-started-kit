@@ -2,7 +2,7 @@
 tools/gobuster.py — Directory, DNS, and vhost brute-forcing with gobuster.
 """
 
-from mcp_server import kali_client
+import executor
 
 _DEFAULT_WORDLIST_DIR = "/usr/share/wordlists/dirb/common.txt"
 _DEFAULT_WORDLIST_DNS = "/usr/share/wordlists/dirb/common.txt"
@@ -38,7 +38,7 @@ def register(mcp) -> None:
             cmd += f" -x {extensions}"
         if options:
             cmd += f" {options}"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)
 
     @mcp.tool()
     def gobuster_dns(
@@ -61,7 +61,7 @@ def register(mcp) -> None:
         cmd = f"gobuster dns -d {domain} -w {wordlist} -t {threads}"
         if options:
             cmd += f" {options}"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)
 
     @mcp.tool()
     def gobuster_vhost(
@@ -84,4 +84,4 @@ def register(mcp) -> None:
         cmd = f"gobuster vhost -u {url} -w {wordlist} -t {threads}"
         if options:
             cmd += f" {options}"
-        return kali_client.run(cmd, timeout=timeout)
+        return executor.execute_tool(cmd, timeout=timeout)

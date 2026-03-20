@@ -1,5 +1,5 @@
 """
-mcp_server/tools/__init__.py — Auto-discovery for tool modules.
+tools/__init__.py — Auto-discovery for tool modules.
 
 Any .py file dropped into this directory is loaded automatically.
 Each module must expose a  register(mcp)  function that decorates
@@ -22,7 +22,7 @@ def register_all(mcp) -> None:
     for filename in sorted(os.listdir(tools_dir)):
         if not filename.endswith(".py") or filename == "__init__.py":
             continue
-        module_name = f"mcp_server.tools.{filename[:-3]}"
+        module_name = f"tools.{filename[:-3]}"
         try:
             mod = importlib.import_module(module_name)
             if hasattr(mod, "register"):
