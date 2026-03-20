@@ -1,0 +1,15 @@
+kind: wowbits_mcp_config
+config:
+  name: llm_sandbox
+  url: null
+  config:
+    transport_mode: stdio
+    timeout: 60
+    command: python3
+    args:
+      - -m
+      - llm_sandbox.mcp_server.server
+    env:
+      BACKEND: docker
+      COMMIT_CONTAINER: "true"
+      KEEP_TEMPLATE: "true"

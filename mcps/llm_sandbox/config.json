@@ -1,0 +1,9 @@
+{
+  "transport_mode": "stdio",
+  "args": ["-m", "llm_sandbox.mcp_server.server"],
+  "env": {
+    "BACKEND": "docker",
+    "COMMIT_CONTAINER": "true",
+    "KEEP_TEMPLATE": "true"
+  }
+}
