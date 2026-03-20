@@ -1,0 +1,7 @@
+kind: mcp_config
+config:
+  name: kali_linux
+  url: http://localhost:8765/mcp
+  config:
+    transport_mode: http
+    timeout: 300

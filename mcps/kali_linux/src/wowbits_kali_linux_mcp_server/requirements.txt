@@ -1,0 +1,4 @@
+# Host-side MCP server dependencies
+# Install with: pip install -r requirements.txt
+fastmcp>=0.2.0
+requests>=2.31.0

@@ -1,0 +1,26 @@
+{
+  "_comment": [
+    "WowBits Kali Linux MCP Server — client configuration.",
+    "Paste the 'wowbits-kali' block into your MCP client config file.",
+    "",
+    "Claude Desktop (macOS):  ~/Library/Application Support/Claude/claude_desktop_config.json",
+    "Claude Desktop (Linux):  ~/.config/claude/claude_desktop_config.json",
+    "",
+    "BEFORE using this config:",
+    "  1. Replace /ABSOLUTE/PATH/TO with the real path to this project.",
+    "  2. Start the container:  ./scripts/start.sh",
+    "  3. Install host deps:    pip install -r requirements.txt"
+  ],
+  "mcpServers": {
+    "wowbits-kali": {
+      "command": "python3",
+      "args": [
+        "/ABSOLUTE/PATH/TO/wowbits_kali_linux_mcp_server/mcp_server/server.py"
+      ],
+      "env": {
+        "KALI_API_URL": "http://localhost:5000",
+        "LOG_LEVEL": "INFO"
+      }
+    }
+  }
+}
