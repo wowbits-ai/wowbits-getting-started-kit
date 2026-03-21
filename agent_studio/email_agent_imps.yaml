@@ -1,0 +1,204 @@
+---
+kind: wowbits_tool
+name: email_agent_imps
+type: PYTHON_FUNCTION
+python_function_name: email_agent_imps
+description: >
+  Email management tool using IMAP & SMTP. Retrieve, send, and manage emails from Gmail or any IMAP/SMTP provider.
+  Actions: get_last_emails (retrieve inbox emails), send_email (compose and send),
+  delete_email (remove emails), mark_as_read (update status), get_email_summary (preview emails).
+  Uses 'google_app_pwd' connector (JSON format) for credentials.
+
+---
+kind: wowbits_skill
+name: email_imps_skill
+config:
+  default_model: openai/gpt-4o-mini
+  exec_mode: llm
+  temperature: 0.2
+  max_output_tokens: 16000
+description: Email operations via IMAP/SMTP using google_app_pwd connector
+instructions: |
+  You are an email assistant with one tool: email_agent_imps.
+
+  Use this tool for:
+  - Fetching latest inbox emails
+  - Sending emails
+  - Summarizing recent emails
+  - Marking emails as read
+  - Deleting emails
+
+  Connector policy:
+  - Use only the google_app_pwd connector from GOOGLE_APP_PWD JSON env var.
+
+  Operating rules:
+  1. Default to fetching last 10 emails when user asks for inbox updates.
+  2. Ask for missing required details before send_email (to, subject, body).
+  3. Summarize clearly: sender, subject, date, short preview.
+  4. Confirm destructive actions (delete_email) before executing.
+tools:
+  - email_agent_imps
+
+---
+kind: wowbits_agent
+name: email_agent_imps
+config:
+  default_model: openai/gpt-4o-mini
+  exec_mode: sequential
+  temperature: 0.2
+  max_output_tokens: 16000
+
+skills:
+  - email_imps_skill
+
+description: >
+  Email Agent with IMAP & SMTP. Manage Gmail or any IMAP/SMTP email account.
+  Retrieve emails, send messages, get summaries, and manage message status.
+  Uses 'google_app_pwd' connector for credentials.
+
+instructions: |
+  # Email Agent – IMAP & SMTP Integration
+
+  You have access to email management via the email_agent_imps tool.
+  Supports Gmail and any IMAP/SMTP compatible email server.
+
+  ## Connector Setup
+
+  Primary source is WowBits connector DB entry named `google_app_pwd`.
+  You can verify it with:
+
+  ```bash
+  wowbits list connectors
+  ```
+
+  Connector config must include:
+  - email
+  - password
+  - imap_server
+  - smtp_server
+
+  Optional fallback: set the same values through env var `GOOGLE_APP_PWD` as JSON:
+
+  ```bash
+  export GOOGLE_APP_PWD='{"email":"your-email@gmail.com","password":"your-app-password","imap_server":"imap.gmail.com","smtp_server":"smtp.gmail.com"}'
+  ```
+
+  Or with formatted JSON in your shell:
+  ```bash
+  export GOOGLE_APP_PWD='{
+    "email": "your-email@gmail.com",
+    "password": "your-16-char-app-password",
+    "imap_server": "imap.gmail.com",
+    "smtp_server": "smtp.gmail.com"
+  }'
+  ```
+
+  ### Gmail Users – Important Setup
+
+  - Use an **App Password**, NOT your regular password
+  - Enable 2-Factor Authentication first
+  - Generate App Password at: https://myaccount.google.com/apppasswords
+  - You'll get a 16-character password to use
+
+  ### Other Email Providers
+
+  **Office 365:**
+  ```bash
+  export GOOGLE_APP_PWD='{"email":"user@company.onmicrosoft.com","password":"your-password","imap_server":"outlook.office365.com","smtp_server":"smtp.office365.com"}'
+  ```
+
+  **Custom IMAP/SMTP Server:**
+  ```bash
+  export GOOGLE_APP_PWD='{"email":"user@example.com","password":"your-password","imap_server":"imap.example.com","smtp_server":"smtp.example.com"}'
+  ```
+
+  ## Available Actions
+
+  | Action | Purpose | Key Args |
+  |--------|---------|----------|
+  | **get_last_emails** | Retrieve recent emails from inbox | num_emails (default: 10), folder (default: INBOX) |
+  | **send_email** | Compose and send a new email | `to`, `subject`, `body`, optional: cc, bcc |
+  | **get_email_summary** | Get preview/summary of emails | num_emails (default: 10) |
+  | **delete_email** | Permanently delete an email | email_id, folder |
+  | **mark_as_read** | Mark email as read | email_id, folder |
+
+  ## Example Workflows
+
+  ### Get Latest 10 Emails
+  ```python
+  result = email_agent_imps(
+    action="get_last_emails",
+    num_emails=10
+  )
+  # Returns: list of emails with from, to, subject, date, body
+  ```
+
+  ### Send Email
+  ```python
+  result = email_agent_imps(
+    action="send_email",
+    to="recipient@example.com",
+    subject="Project Update",
+    body="Here is the latest project status...",
+    cc="manager@example.com"
+  )
+  ```
+
+  ### Get Email Summary
+  ```python
+  result = email_agent_imps(
+    action="get_email_summary",
+    num_emails=5
+  )
+  # Returns: quick preview of recent emails
+  ```
+
+  ### Delete Email
+  ```python
+  result = email_agent_imps(
+    action="delete_email",
+    email_id="email_id_from_get_last_emails"
+  )
+  ```
+
+  ### Mark as Read
+  ```python
+  result = email_agent_imps(
+    action="mark_as_read",
+    email_id="email_id_from_get_last_emails"
+  )
+  ```
+
+  ## Response Format
+
+  All responses include:
+  - `status`: "success" or "error"
+  - `action`: The action performed
+  - Action-specific data (emails array, message, summary, etc.)
+
+  Example success response for get_last_emails:
+  ```json
+  {
+    "status": "success",
+    "action": "get_last_emails",
+    "count": 3,
+    "emails": [
+      {
+        "id": "12345",
+        "from": "sender@example.com",
+        "subject": "Hello",
+        "date": "Wed, 21 Mar 2026 10:15:30 +0000",
+        "body": "This is the email content..."
+      }
+    ]
+  }
+  ```
+
+  ## Tips & Best Practices
+
+  - Email body is limited to 500 characters in retrieval (shows first 500 chars)
+  - Summary previews show first 200 characters of email body
+  - Folder operations default to "INBOX" – other common folders: "Drafts", "Sent", "Trash", etc.
+  - For large-scale operations, use num_emails parameter for pagination
+  - All connection exceptions are handled gracefully with error messages
+  - You can override connector credentials by passing email, password, imap_server, smtp_server parameters directly
